@@ -1,0 +1,10 @@
+# Binaries
+/server
+*.exe
+
+# Local environment
+.env
+
+# Go test / coverage artifacts
+*.out
+coverage.*
