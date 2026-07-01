@@ -1,0 +1,6 @@
+# Root-level environment (per-service gitignores handle their own artifacts)
+.env
+
+# OS / editor
+.DS_Store
+Thumbs.db
