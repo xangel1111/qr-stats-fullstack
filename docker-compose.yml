@@ -1,0 +1,71 @@
+name: qr-challenge
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-qrdb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-qrdb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  node-api:
+    build: ./node-api
+    environment:
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-super-secret-change-me}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  go-api:
+    build: ./go-api
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-qrdb}?sslmode=disable
+      AUTO_MIGRATE: "true"
+      JWT_SECRET: ${JWT_SECRET:-super-secret-change-me}
+      JWT_EXPIRY: 1h
+      NODE_STATS_URL: http://node-api:3000
+      NODE_TIMEOUT: 5s
+      AUTH_USERNAME: ${AUTH_USERNAME:-demo}
+      AUTH_PASSWORD: ${AUTH_PASSWORD:-demo123}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      node-api:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://127.0.0.1:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8080
+    ports:
+      - "5173:80"
+    depends_on:
+      - go-api
+
+volumes:
+  pgdata:
