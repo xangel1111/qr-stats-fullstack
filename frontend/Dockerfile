@@ -17,7 +17,13 @@ RUN npm run build
 # ---- run stage ----
 FROM nginx:1.27-alpine
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Render the listen port from $PORT at startup so the same image works locally
+# (defaults to 80) and on platforms that inject a dynamic port (e.g. Railway).
+# NGINX_ENVSUBST_FILTER restricts substitution to PORT, leaving nginx's own
+# $uri variable untouched.
+ENV PORT=80
+ENV NGINX_ENVSUBST_FILTER=^PORT$
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80

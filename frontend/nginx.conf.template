@@ -1,5 +1,7 @@
 server {
-    listen 80;
+    # ${PORT} is substituted at container start (defaults to 80 locally,
+    # set dynamically by the platform e.g. Railway).
+    listen ${PORT};
     server_name _;
 
     root /usr/share/nginx/html;

@@ -62,8 +62,12 @@ func main() {
 		DB:           pool,
 	})
 
-	logger.Info("starting server", "port", cfg.Port)
-	if err := app.Listen(":" + cfg.Port); err != nil {
+	// Listen on all interfaces, dual-stack (IPv4 + IPv6). Some platforms route
+	// to services over IPv6 (e.g. Railway private networking), so binding only
+	// to 0.0.0.0 would make the service unreachable there.
+	addr := "[::]:" + cfg.Port
+	logger.Info("starting server", "addr", addr)
+	if err := app.Listen(addr); err != nil {
 		logger.Error("server error", "error", err)
 		os.Exit(1)
 	}

@@ -127,6 +127,8 @@ y en cada pull request, con tres jobs en paralelo:
 └── README.md
 ```
 
-## Pendiente
+## Despliegue en la nube
 
-- Despliegue en la nube.
+Guía paso a paso para desplegar en **Railway** (4 servicios: frontend, go-api,
+node-api y PostgreSQL) en [DEPLOY.md](DEPLOY.md). Los contenedores ya están
+preparados para plataformas con puerto dinámico y red IPv6.
