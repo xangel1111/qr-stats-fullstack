@@ -15,25 +15,11 @@ Dos APIs REST que colaboran vía HTTP, orquestadas con Docker Compose:
 
 ## Arquitectura
 
-```
-                 ┌──────────────┐
-   cliente ────▶ │  API Go      │  POST /api/v1/qr
-                 │  (Fiber)     │
-                 │  - valida    │        ┌──────────────┐
-                 │  - QR (gonum)│ ─────▶ │  API Node    │  POST /internal/stats
-                 │  - orquesta  │  HTTP  │  (Express)   │
-                 │  - persiste  │ ◀───── │  - stats     │
-                 └──────┬───────┘        └──────────────┘
-                        │
-                        ▼
-                 ┌──────────────┐
-                 │ PostgreSQL   │  historial / auditoría de cómputos
-                 └──────────────┘
-```
+![Arquitectura del sistema](docs/images/architecture.png)
 
 Go actúa como **orquestador**: el cliente sólo necesita conocer la API de Go.
-La comunicación Go→Node es HTTP y viaja autenticada con un **JWT HS256** cuyo
-secreto comparten ambos servicios.
+La comunicación Go→Node es HTTP y se protege mediante JWT HS256, usando un
+secreto compartido entre ambos servicios.
 
 ## Cómo ejecutar (todo el stack)
 
